@@ -14,8 +14,7 @@ contract StarNotary is ERC721 {
 
     mapping(uint256 => Star) public tokenIdToStarInfo; 
     mapping(uint256 => uint256) public starsForSale;
-    mapping(string => uint256[]) raToStars;
-    mapping(string => uint256[]) decToStars;
+    mapping(string => uint256) coordToStar;
 
     function createStar(string _name, string _ra, string _dec, string _mag, string _story, uint256 _tokenId) public { 
         require(checkIfStarExist(_ra, _dec) == false, "A star with these coordinates is already registered.");
@@ -23,8 +22,8 @@ contract StarNotary is ERC721 {
         Star memory newStar = Star(_name, _ra, _dec, _mag, _story);
 
         tokenIdToStarInfo[_tokenId] = newStar;
-        raToStars[_ra].push(_tokenId);
-        decToStars[_dec].push(_tokenId);
+        string memory key = coordToKey(_ra, _dec);
+        coordToStar[key] = _tokenId;
 
         _mint(msg.sender, _tokenId);
     }
@@ -53,17 +52,14 @@ contract StarNotary is ERC721 {
     }
 
     function checkIfStarExist(string _ra, string _dec) private view returns(bool) {
-        uint256[] memory ras = raToStars[_ra];
-        uint256[] memory decs = decToStars[_dec];
+        string memory key = coordsToKey(_ra, _dec);
+        uint256 memory starId = coordToStar[key];
+        return starId != 0;
+    }
 
-        for(uint i = 0; i < ras.length; i++) {
-            for(uint j = 0; j < decs.length; j++) {
-                if(ras[i] == decs[j]) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+    function coordsToKey(string _ra, string _dec) private view returns(string) {
+        bytes memory keyBytes = abi.encodePacked(_ra, _dec);
+        string memory key = string(keyBytes);
+        return key;
     }
 }
