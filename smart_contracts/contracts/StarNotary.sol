@@ -22,7 +22,7 @@ contract StarNotary is ERC721 {
         Star memory newStar = Star(_name, _ra, _dec, _mag, _story);
 
         tokenIdToStarInfo[_tokenId] = newStar;
-        string memory key = coordToKey(_ra, _dec);
+        string memory key = coordsToKey(_ra, _dec);
         coordToStar[key] = _tokenId;
 
         _mint(msg.sender, _tokenId);
@@ -53,11 +53,11 @@ contract StarNotary is ERC721 {
 
     function checkIfStarExist(string _ra, string _dec) private view returns(bool) {
         string memory key = coordsToKey(_ra, _dec);
-        uint256 memory starId = coordToStar[key];
+        uint256 starId = coordToStar[key];
         return starId != 0;
     }
 
-    function coordsToKey(string _ra, string _dec) private view returns(string) {
+    function coordsToKey(string _ra, string _dec) private pure returns(string) {
         bytes memory keyBytes = abi.encodePacked(_ra, _dec);
         string memory key = string(keyBytes);
         return key;
